@@ -107,24 +107,94 @@ loop(State, Request, Ref) ->
 
 %% executes `/join` protocol from client perspective
 do_join(State, Ref, ChatName) ->
-    io:format("client:do_join(...): IMPLEMENT ME~n"),
-    {{dummy_target, dummy_response}, State}.
+	%code given
+    % io:format("client:do_join(...): IMPLEMENT ME~n"),
+    % {{dummy_target, dummy_response}, State}.
+	% State#cl_st.con_ch
+	Chatrooms = maps:keys(State#cl_st.con_ch),
+	% check if already in the chat with the same name, 
+	% 3.2.2
+	case lists:member(ChatName, Chatrooms) of
+		true ->
+				State#cl_st.gui!{result, self(), Ref, err};
+		false ->  
+				% send "ask to join" message to the server @ ServerPID
+				% 3.2.3
+				% server pid is stored in whereis(server)
+				whereis(server)!{self(), Ref, join,ChatName},
+				%% receive connect message
+				receive
+					{self(), Ref, connect, State#chat_st.history} ->
+						% update connected chatrooms
+						State#cl_st{con_ch = maps:put(ChatName, Room, State#cl_st.con_ch)},
+						%send{result,self(), Ref, History} SEND IT ALL TO GUI TO WRITE TO THE SCREEN
+						%3.2.9
+						State#cl_st.gui!{result,self(), Ref, History}
+				end
+	end.
 
 %% executes `/leave` protocol from client perspective
 do_leave(State, Ref, ChatName) ->
-    io:format("client:do_leave(...): IMPLEMENT ME~n"),
-    {{dummy_target, dummy_response}, State}.
+    % io:format("client:do_leave(...): IMPLEMENT ME~n"),
+    % {{dummy_target, dummy_response}, State}.
+	Chatrooms = maps:keys(State#cl_st.con_ch),
+	case lists:member(ChatName,Chatrooms) of 
+		true -> 
+			%% if found then send leave message 3.3.3
+			whereis(server)!{self(), Ref, leave, ChatName},
+			%recieve message from server 3.3.7
+			receive 
+				{self(), Ref, ack_leave} -> 
+					%3.3.8 client removes the chatroom from list of chatrooms
+					State#cl_st{con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
+					%3.3.9 client sends message back to the GUI
+					State#cl_st.gui!{result, self(), Ref, ok}
+			end;
+		false->
+			%%if not throw the error to the GUI ----- 3.3.2
+			State#cl_st.gui!{result, self(), Ref, err}
+		end. 
 
 %% executes `/nick` protocol from client perspective
 do_new_nick(State, Ref, NewNick) ->
-    io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
-    {{dummy_target, dummy_response}, State}.
+    % io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
+    % {{dummy_target, dummy_response}, State}.
+	CurrentNick = State#cl_st.nick,
+	case (CurrentNick == NewNick) of
+		true ->
+			%if it is the same client sends message to gui  3.5.2 
+			State#cl_st.gui!{result, self(), Ref, err_same},
+		false->
+			% if not the same send nickname to server to update
+			%3.5.3
+			whereis(server)!{self(), Ref, nick, Nick},
+			receive
+				{self(), Ref, err_nick_used} -> 
+						%% 3.5.4 take message and pass back to the gui from the server 
+						State#cl_st.gui!{result, self(), Ref, err_nick_used}
+				{self(), Ref, ok_nick} -> 
+						%3.5.8 client sends back to gui 
+						State#cl_st {nick = NewNick},
+						State#cl_st.gui!{result, self(), Ref, ok_nick}
+			end
+	end.
 
 %% executes send message protocol from client perspective
 do_msg_send(State, Ref, ChatName, Message) ->
-    io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
-    {{dummy_target, dummy_response}, State}.
-
+    % io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
+    % {{dummy_target, dummy_response}, State}.
+	%3.6.1.2
+	%look up the PID of the chatroom its connected to 
+	ChatroomPID= maps:get(ChatName, State#cl_st.con_ch),
+	%3.6.1.3 sending client will then send message to the chatroomn
+	ChatroomPID!{self(), Ref, message, Message},
+	recieve
+		{self(), Ref, ack_msg} ->
+			% message recieved as per 3.6.1.4
+			% then send to gui
+			State#cl_st.gui!{result, self(), Ref, {msg_sent, State#cl_st.nick}}
+	end
+ 	
 %% executes new incoming message protocol from client perspective
 do_new_incoming_msg(State, _Ref, CliNick, ChatName, Msg) ->
     %% pass message along to gui
@@ -133,5 +203,16 @@ do_new_incoming_msg(State, _Ref, CliNick, ChatName, Msg) ->
 
 %% executes quit protocol from client perspective
 do_quit(State, Ref) ->
-    io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
-    {{dummy_target, dummy_response}, State}.
+    % io:format("client:do_new_nick(...): IMPLEMENT ME~n"),
+    % {{dummy_target, dummy_response}, State}.
+	% client sends message to server that we want to quit 3.7.1
+	whereis(server)!{self(), Ref, quit},
+	receive
+		{self(), Ref, ack_quit} ->
+			%3.7.5 client must send quit to GUI
+			State#cl_st.gui!{self(), Ref, ack quit}
+	end
+	% 3.7.6 the client muyst cleanly exit 
+	exit("Goodbye...").
+
+			
