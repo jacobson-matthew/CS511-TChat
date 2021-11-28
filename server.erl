@@ -91,7 +91,7 @@ do_join(ChatName, ClientPID, Ref, State) ->
 			% TODO: may have to add nicks at the begining if interp yells at us 
 			% send update to the newly added registration and chatroom
 			%3.2.7
-			#serv_st {registrations = NewRegistrationMap, chatrooms = NewChatroomMap}
+			#serv_st {nicks = State#serv_st.nicks, registrations = NewRegistrationMap, chatrooms = NewChatroomMap}
 	end.
 				
 %% executes leave protocol from server perspective
@@ -135,7 +135,7 @@ do_new_nick(State, Ref, ClientPID, NewNick) ->
 			maps:map(fun(_, ChatroomPID) -> ChatroomPID!{self(), Ref, update_nick, ClientPID, NewNick} end, ChatroomsPIDs),
 			% 3.5.7 send message to client
 			ClientPID!{self(), Ref, ok_nick},
-			#serv_st {nicks = NewNicknames}
+			#serv_st {nicks = NewNicknames, registrations = State#serv_st.registrations, chatrooms = State#serv_st.chatrooms}
 	end. 
 
 %% executes client quit protocol from server perspective
