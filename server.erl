@@ -149,7 +149,7 @@ do_client_quit(State, Ref, ClientPID) ->
 	ClientsChatrooms = maps:filter(fun(_,PIDs)-> lists:member(ClientPID, PIDs) end, State#serv_st.registrations),
 	ChatroomNames = maps:keys(ClientsChatrooms),
 	ChatroomsPIDs = maps:filter(fun(Names,_)-> lists:member(Names, ChatroomNames) end, State#serv_st.chatrooms),
-	maps:foreach(fun(ChatroomPID) -> ChatroomPID!{self(), Ref, unregister, ClientPID} end, ChatroomsPIDs),
+	maps:map(fun(_,ChatroomPID) -> ChatroomPID!{self(), Ref, unregister, ClientPID} end, ChatroomsPIDs),
 	%% remove client from server's copy of chat registrations
 	NewRegistrationMap = maps:map(fun(_,Chatrooms) -> lists:delete(ClientPID, Chatrooms) end, State#serv_st.registrations),
 	%3.7.4 server sends back to client
