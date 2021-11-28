@@ -172,8 +172,8 @@ do_new_nick(State, Ref, NewNick) ->
 			receive
 				{_ , Ref, err_nick_used} -> 
 						%% 3.5.4 take message and pass back to the gui from the server 
-						list_to_atom(State#cl_st.gui)!{result, self(), Ref, err_nick_used};
-						{err_nick_used, #cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch}}
+						list_to_atom(State#cl_st.gui)!{result, self(), Ref, err_nick_used},
+						{err_nick_used, #cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch}};
 				{_ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						% update nick locally 
