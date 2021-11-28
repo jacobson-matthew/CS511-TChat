@@ -199,6 +199,7 @@ do_msg_send(State, Ref, ChatName, Message) ->
 		{ _, Ref, ack_msg} ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
+			io:fwrite("~s",State),
 			whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, {msg_sent, State#cl_st.nick}},
 			{ack_msg, State}
 	end.
