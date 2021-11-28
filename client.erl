@@ -163,8 +163,8 @@ do_new_nick(State, Ref, NewNick) ->
 	case (CurrentNick == NewNick) of
 		true ->
 			%if it is the same client sends message to gui  3.5.2 
-			State#cl_st.gui!{result, self(), Ref, err_same},
-		false->
+			State#cl_st.gui!{result, self(), Ref, err_same};
+		false ->
 			% if not the same send nickname to server to update
 			%3.5.3
 			whereis(server)!{self(), Ref, nick, Nick},
@@ -188,7 +188,7 @@ do_msg_send(State, Ref, ChatName, Message) ->
 	ChatroomPID= maps:get(ChatName, State#cl_st.con_ch),
 	%3.6.1.3 sending client will then send message to the chatroomn
 	ChatroomPID!{self(), Ref, message, Message},
-	recieve
+	receive
 		{self(), Ref, ack_msg} ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
@@ -210,7 +210,7 @@ do_quit(State, Ref) ->
 	receive
 		{self(), Ref, ack_quit} ->
 			%3.7.5 client must send quit to GUI
-			State#cl_st.gui!{self(), Ref, ack quit}
+			State#cl_st.gui!{self(), Ref, ack_quit}
 	end
 	% 3.7.6 the client muyst cleanly exit 
 	exit("Goodbye...").
