@@ -128,7 +128,7 @@ do_new_nick(State, Ref, ClientPID, NewNick) ->
 			% search through client PIDs in registrations to find chatroom names
 			% then send message to each chatroom in get(chatroom, pid, chatrooms) 3.5.6
 			ClientsChatrooms = maps:filter(fun(PIDs)-> lists:member(ClientPID, PIDs) end, State#serv_st.registrations),
-			ChatroomNames = maps:keys(ClientsChatooms),
+			ChatroomNames = maps:keys(ClientsChatrooms),
 			ChatroomsPIDs = maps:filter(fun(Names)-> lists:member(Names, ChatroomNames) end, State#serv_st.chatrooms),
 			%% for each chatroom send message to update nick 3.5.6
 			maps:foreach(fun(ChatroomPID) -> ChatroomPID!{self(), Ref, update_nick, ClientPID, NewNick} end, ChatroomsPIDs),
