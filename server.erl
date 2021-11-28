@@ -145,12 +145,12 @@ do_client_quit(State, Ref, ClientPID) ->
 	%remove client from nicknames, 
 	NewNickMap = maps:remove(ClientPID, State#serv_st.nicks),
 	%%tell each chatroom to which the client is registered that the eclient is leaving
-	ClientsChatrooms = maps:filter(fun(PIDs)-> lists:member(ClientPID, PIDs) end, State#serv_st.registrations),
+	ClientsChatrooms = maps:filter(fun(_,PIDs)-> lists:member(ClientPID, PIDs) end, State#serv_st.registrations),
 	ChatroomNames = maps:keys(ClientsChatrooms),
-	ChatroomsPIDs = maps:filter(fun(Names)-> lists:member(Names, ChatroomNames) end, State#serv_st.chatrooms),
+	ChatroomsPIDs = maps:filter(fun(Names,_)-> lists:member(Names, ChatroomNames) end, State#serv_st.chatrooms),
 	maps:foreach(fun(ChatroomPID) -> ChatroomPID!{self(), Ref, unregister, ClientPID} end, ChatroomsPIDs),
 	%% remove client from server's copy of chat registrations
-	NewRegistrationMap = maps:map(fun(Chatrooms) -> lists:delete(ClientPID, Chatrooms) end, State#serv_st.registrations),
+	NewRegistrationMap = maps:map(fun(_,Chatrooms) -> lists:delete(ClientPID, Chatrooms) end, State#serv_st.registrations),
 	%3.7.4 server sends back to client
 	ClientPID!{self(), Ref, ack_quit},
 	% Update the State to confirm the change 
