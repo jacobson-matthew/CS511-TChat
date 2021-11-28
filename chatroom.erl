@@ -44,7 +44,7 @@ do_register(State, Ref, ClientPID, ClientNick) ->
     ClientPID!{self(), Ref, connect, State#chat_st.history},
 	%update registration with client pid -> client nickname
 	%3.2.8
-	State#chat_st{registrations = maps:put{ClientPID, ClientNick, State#chat_st.registrations)}.
+	State#chat_st{registrations = maps:put(ClientPID, ClientNick, State#chat_st.registrations)}.
 
 %% This function should unregister a client from this chatroom
 do_unregister(State, ClientPID) ->
