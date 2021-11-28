@@ -73,7 +73,7 @@ do_join(ChatName, ClientPID, Ref, State) ->
 			NewReg = lists:append([ClientPID], maps:get(ChatName, State#serv_st.registrations)),
 			NewRegistrationMap = maps:update(ChatName, NewReg, State#serv_st.registrations),
 			%3.2.7
-			#serv_st {registrations = NewRegistrationMap};
+			#serv_st {nicks = State#serv_st.nicks, registrations = NewRegistrationMap, chatrooms = State#serv_st.chatrooms};
 		false -> 
 			%spawn chatroom and add to list 
 			NewRoom = spawn(chatroom, start_chatroom, [ChatName]),
@@ -108,7 +108,7 @@ do_leave(ChatName, ClientPID, Ref, State) ->
 	%% TODO: the chatroom will remove the client from its record of registered clients
 	%3.3.7 the server will then send the message  {self(), Ref, ack_leave} to client
 	ClientPID!{self(), Ref, ack_leave},
-	State#serv_st {registrations = NewRegistrationMap}.
+	#serv_st {nicks = State#serv_st.nicks, registrations = NewRegistrationMap, chatrooms = State#serv_st.chatrooms}.
 
 
 %% executes new nickname protocol from server perspective
@@ -156,5 +156,5 @@ do_client_quit(State, Ref, ClientPID) ->
 	%3.7.4 server sends back to client
 	ClientPID!{self(), Ref, ack_quit},
 	% Update the State to confirm the change 
-	State#serv_st {nicks = NewNickMap, registrations = NewRegistrationMap}.
+	#serv_st {nicks = NewNickMap, registrations = NewRegistrationMap, chatrooms = State#serv_st.chatrooms}.
 	
