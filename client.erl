@@ -116,7 +116,8 @@ do_join(State, Ref, ChatName) ->
 	% 3.2.2
 	case lists:member(ChatName, Chatrooms) of
 		true ->
-				list_to_atom(State#cl_st.gui)!{result, self(), Ref, err};
+				list_to_atom(State#cl_st.gui)!{result, self(), Ref, err},
+				{err, State};
 		false ->  
 				% send "ask to join" message to the server @ ServerPID
 				% 3.2.3
@@ -127,10 +128,10 @@ do_join(State, Ref, ChatName) ->
 					%3.2.8
 					{ChatPID, Ref, connect, History} ->
 						% update connected chatrooms
-						#cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)},
 						%send{result,self(), Ref, History} SEND IT ALL TO GUI TO WRITE TO THE SCREEN
 						%3.2.9
-						list_to_atom(State#cl_st.gui)!{result,self(), Ref, History}
+						list_to_atom(State#cl_st.gui)!{result,self(), Ref, History},
+						{History, #cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)}}
 				end
 	end.
 
@@ -147,13 +148,15 @@ do_leave(State, Ref, ChatName) ->
 			receive 
 				{_, Ref, ack_leave} -> 
 					%3.3.8 client removes the chatroom from list of chatrooms
-					#cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
+					UpState = #cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
 					%3.3.9 client sends message back to the GUI
 					list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok}
+					{ack_leave, UpState}
 			end;
 		false->
 			%%if not throw the error to the GUI ----- 3.3.2
-			State#cl_st.gui!{result, self(), Ref, err}
+			State#cl_st.gui!{result, self(), Ref, err},
+			{err, State}
 		end. 
 
 %% executes `/nick` protocol from client perspective
@@ -164,7 +167,8 @@ do_new_nick(State, Ref, NewNick) ->
 	case (CurrentNick == NewNick) of
 		true ->
 			%if it is the same client sends message to gui  3.5.2 
-			list_to_atom(State#cl_st.gui)!{result, self(), Ref, err_same};
+			list_to_atom(State#cl_st.gui)!{result, self(), Ref, err_same},
+			{err, State};
 		false ->
 			% if not the same send nickname to server to update
 			%3.5.3
@@ -195,7 +199,8 @@ do_msg_send(State, Ref, ChatName, Message) ->
 		{ _, Ref, ack_msg} ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
-			list_to_atom(State#cl_st.gui)!{result, self(), Ref, {msg_sent, State#cl_st.nick}}
+			list_to_atom(State#cl_st.gui)!{result, self(), Ref, {msg_sent, State#cl_st.nick}},
+			{ack_msg, State}
 	end.
  	
 %% executes new incoming message protocol from client perspective
@@ -217,5 +222,6 @@ do_quit(State, Ref) ->
 	end,
 	% 3.7.6 the client muyst cleanly exit 
 	exit("Goodbye...").
+	{ack_quit, State}
 
 			
