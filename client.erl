@@ -177,7 +177,8 @@ do_new_nick(State, Ref, NewNick) ->
 						%3.5.8 client sends back to gui 
 						% update nick locally 
 						State#cl_st {nick = NewNick},
-						list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok_nick}
+						%%list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok_nick}
+						{result, self(), Ref, ok_nick}
 			end
 	end.
 
