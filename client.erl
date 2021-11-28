@@ -127,7 +127,7 @@ do_join(State, Ref, ChatName) ->
 					%3.2.8
 					{ChatPID, Ref, connect, History} ->
 						% update connected chatrooms
-						State#cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)},
+						#cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)},
 						%send{result,self(), Ref, History} SEND IT ALL TO GUI TO WRITE TO THE SCREEN
 						%3.2.9
 						list_to_atom(State#cl_st.gui)!{result,self(), Ref, History}
@@ -147,7 +147,7 @@ do_leave(State, Ref, ChatName) ->
 			receive 
 				{_, Ref, ack_leave} -> 
 					%3.3.8 client removes the chatroom from list of chatrooms
-					State#cl_st{con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
+					#cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
 					%3.3.9 client sends message back to the GUI
 					list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok}
 			end;
@@ -176,7 +176,7 @@ do_new_nick(State, Ref, NewNick) ->
 				{_ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						% update nick locally 
-						%%State#cl_st {nick = NewNick},
+						#cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch},
 						whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, ok_nick}
 			end
 	end.
