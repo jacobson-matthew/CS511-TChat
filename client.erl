@@ -171,7 +171,7 @@ do_new_nick(State, Ref, NewNick) ->
 			receive
 				{self(), Ref, err_nick_used} -> 
 						%% 3.5.4 take message and pass back to the gui from the server 
-						State#cl_st.gui!{result, self(), Ref, err_nick_used}
+						State#cl_st.gui!{result, self(), Ref, err_nick_used};
 				{self(), Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						State#cl_st {nick = NewNick},
@@ -193,7 +193,7 @@ do_msg_send(State, Ref, ChatName, Message) ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
 			State#cl_st.gui!{result, self(), Ref, {msg_sent, State#cl_st.nick}}
-	end
+	end.
  	
 %% executes new incoming message protocol from client perspective
 do_new_incoming_msg(State, _Ref, CliNick, ChatName, Msg) ->
@@ -211,7 +211,7 @@ do_quit(State, Ref) ->
 		{self(), Ref, ack_quit} ->
 			%3.7.5 client must send quit to GUI
 			State#cl_st.gui!{self(), Ref, ack_quit}
-	end
+	end,
 	% 3.7.6 the client muyst cleanly exit 
 	exit("Goodbye...").
 
