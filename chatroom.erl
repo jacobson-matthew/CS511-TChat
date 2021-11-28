@@ -44,19 +44,19 @@ do_register(State, Ref, ClientPID, ClientNick) ->
     ClientPID!{self(), Ref, connect, State#chat_st.history},
 	%update registration with client pid -> client nickname
 	%3.2.8
-	State#chat_st{registrations = maps:put(ClientPID, ClientNick, State#chat_st.registrations)}.
+	#chat_st{name = State#chat_st.name, registrations = maps:put(ClientPID, ClientNick, State#chat_st.registrations), history = State#chat_st.history}.
 
 %% This function should unregister a client from this chatroom
 do_unregister(State, ClientPID) ->
     % io:format("chatroom:do_unregister(...): IMPLEMENT ME~n"),
     % State.
 	% 3.3.6a chatroom will remove client from its record
-	State#chat_st{registrations = maps:remove(ClientPID,  State#chat_st.registrations)}.
+	#chat_st{name = State#chat_st.name, registrations = maps:remove(ClientPID,  State#chat_st.registrations), history = State#chat_st.history}.
 
 %% This function should update the nickname of specified client.
 do_update_nick(State, ClientPID, NewNick) ->
 	%% 3.5.6 updates registration clientPid key with new nickname
-    State#chat_st{registrations = maps:update(ClientPID, NewNick, State#chat_st.registrations)}.
+    #chat_st{name = State#chat_st.name, registrations = maps:update(ClientPID, NewNick, State#chat_st.registrations), history = State#chat_st.history}.
 
 %% This function should update all clients in chatroom with new message
 %% (read assignment specs for details)
@@ -72,7 +72,7 @@ do_propegate_message(State, Ref, ClientPID, Message) ->
 	% for each recivers send message to all but the sender 3.6.2.1
 	lists:foreach(fun(DestinationClient) -> DestinationClient!{request, self(), Ref, {incoming_msg, SenderName, State#chat_st.name, Message}}end, Receivers),
 	% append current message to history 3.6.2.2
-	State#chat_st { history = lists:append(State#chat_st.history, [{SenderName, Message}])}.
+	#chat_st {name = State#chat_st.name, registrations = State@chat_st.registrations, history = lists:append(State#chat_st.history, [{SenderName, Message}])}.
 
 
 
