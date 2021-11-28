@@ -123,10 +123,11 @@ do_join(State, Ref, ChatName) ->
 				% server pid is stored in whereis(server)
 				whereis(server)!{self(), Ref, join,ChatName},
 				%% receive connect message
-				receive
-					{self(), Ref, connect, State#chat_st.history} ->
+				receive 
+					%3.2.8
+					{ChatPID, Ref, connect, History} ->
 						% update connected chatrooms
-						State#cl_st{con_ch = maps:put(ChatName, Room, State#cl_st.con_ch)},
+						State#cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)},
 						%send{result,self(), Ref, History} SEND IT ALL TO GUI TO WRITE TO THE SCREEN
 						%3.2.9
 						State#cl_st.gui!{result,self(), Ref, History}
@@ -167,12 +168,12 @@ do_new_nick(State, Ref, NewNick) ->
 		false ->
 			% if not the same send nickname to server to update
 			%3.5.3
-			whereis(server)!{self(), Ref, nick, Nick},
+			whereis(server)!{self(), Ref, nick, NewNick},
 			receive
-				{self(), Ref, err_nick_used} -> 
+				{ _ , Ref, err_nick_used} -> 
 						%% 3.5.4 take message and pass back to the gui from the server 
 						State#cl_st.gui!{result, self(), Ref, err_nick_used};
-				{self(), Ref, ok_nick} -> 
+				{ _ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						State#cl_st {nick = NewNick},
 						State#cl_st.gui!{result, self(), Ref, ok_nick}
@@ -189,7 +190,7 @@ do_msg_send(State, Ref, ChatName, Message) ->
 	%3.6.1.3 sending client will then send message to the chatroomn
 	ChatroomPID!{self(), Ref, message, Message},
 	receive
-		{self(), Ref, ack_msg} ->
+		{ _, Ref, ack_msg} ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
 			State#cl_st.gui!{result, self(), Ref, {msg_sent, State#cl_st.nick}}
@@ -208,7 +209,7 @@ do_quit(State, Ref) ->
 	% client sends message to server that we want to quit 3.7.1
 	whereis(server)!{self(), Ref, quit},
 	receive
-		{self(), Ref, ack_quit} ->
+		{ _, Ref, ack_quit} ->
 			%3.7.5 client must send quit to GUI
 			State#cl_st.gui!{self(), Ref, ack_quit}
 	end,
