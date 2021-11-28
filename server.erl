@@ -121,7 +121,7 @@ do_new_nick(State, Ref, ClientPID, NewNick) ->
 	case lists:member(NewNick, Nicknames) of
 		true -> 
 			%3.5.4 if it already exists throw an error back to the client
-			ClientPID!{self(), Ref, err_nick_used};
+			ClientPID!{self(), Ref, err_nick_used},
 			State;
 		false -> 
 			% 3.5.5 point client PID to new nickname
