@@ -41,7 +41,7 @@ end,
 %% This function should register a new client to this chatroom
 do_register(State, Ref, ClientPID, ClientNick) ->
 	%tell client about itself by sending itself
-    ClientPID!{{self(), Ref, connect, State#chat_st.history},
+    ClientPID!{self(), Ref, connect, State#chat_st.history},
 	%update registration with client pid -> client nickname
 	%3.2.8
 	State#chat_st{registrations = maps:put{ClientPID, ClientNick, State#chat_st.registrations)}.
