@@ -150,7 +150,7 @@ do_leave(State, Ref, ChatName) ->
 					%3.3.8 client removes the chatroom from list of chatrooms
 					UpState = #cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
 					%3.3.9 client sends message back to the GUI
-					list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok}
+					list_to_atom(State#cl_st.gui)!{result, self(), Ref, ok},
 					{ack_leave, UpState}
 			end;
 		false->
@@ -222,6 +222,5 @@ do_quit(State, Ref) ->
 	end,
 	% 3.7.6 the client muyst cleanly exit 
 	exit("Goodbye...").
-	{ack_quit, State}
 
 			
