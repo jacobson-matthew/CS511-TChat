@@ -80,7 +80,7 @@ do_join(ChatName, ClientPID, Ref, State) ->
 			% add to chatroom list
 			NewChatroomMap = maps:put(ChatName, NewRoom, State#serv_st.chatrooms),
 			% add the first client
-			NewRegistrationMap = maps:put(ChatName,[ClientPID], State#serv_st.registrations)
+			NewRegistrationMap = maps:put(ChatName,[ClientPID], State#serv_st.registrations),
 			% look up the cliets nickname from server's serv_st record 3.2.5
 			ClientNick = maps:get(ClientPID, State#serv_st.nicks),
 			%server tells chatroom that client is joining chatroom
@@ -121,7 +121,7 @@ do_new_nick(State, Ref, ClientPID, NewNick) ->
 	case lists:member(NewNick, Nicknames) of
 		true -> 
 			%3.5.4 if it already exists throw an error back to the client
-			ClientPID!{self(), Ref, err_nick_used}
+			ClientPID!{self(), Ref, err_nick_used};
 		false -> 
 			% 3.5.5 point client PID to new nickname
 			NewNicknames = maps:update(ClientPID, NewNick, State#serv_st.nicks),
@@ -148,7 +148,7 @@ do_client_quit(State, Ref, ClientPID) ->
 	ClientsChatrooms = maps:filter(fun(PIDs)-> lists:member(ClientPID, PIDs) end, State#serv_st.registrations),
 	ChatroomNames = maps:keys(ClientsChatooms),
 	ChatroomsPIDs = maps:filter(fun(Names)-> lists:member(Names, ChatroomNames) end, State#serv_st.chatrooms),
-	maps:foreach(fun(ChatroomPID) -> ChatroomPID!{self(), Ref, unregister, ClientPID}, end), ChatroomsPIDs),
+	maps:foreach(fun(ChatroomPID) -> ChatroomPID!{self(), Ref, unregister, ClientPID} end, ChatroomsPIDs),
 	%% remove client from server's copy of chat registrations
 	NewRegistrationMap = maps:map(fun(Chatrooms) -> lists:delete(ClientPID, Chatrooms) end, State#serv_st.registrations),
 	%3.7.4 server sends back to client
