@@ -145,7 +145,7 @@ do_leave(State, Ref, ChatName) ->
 			whereis(server)!{self(), Ref, leave, ChatName},
 			%recieve message from server 3.3.7
 			receive 
-				{self(), Ref, ack_leave} -> 
+				{_, Ref, ack_leave} -> 
 					%3.3.8 client removes the chatroom from list of chatrooms
 					State#cl_st{con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
 					%3.3.9 client sends message back to the GUI
