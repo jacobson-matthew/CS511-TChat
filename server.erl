@@ -122,6 +122,7 @@ do_new_nick(State, Ref, ClientPID, NewNick) ->
 		true -> 
 			%3.5.4 if it already exists throw an error back to the client
 			ClientPID!{self(), Ref, err_nick_used};
+			State;
 		false -> 
 			% 3.5.5 point client PID to new nickname
 			NewNicknames = maps:update(ClientPID, NewNick, State#serv_st.nicks),
