@@ -181,7 +181,7 @@ do_new_nick(State, Ref, NewNick) ->
 				{_ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						% update nick locally 
-						whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, ok_nick},
+						%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, ok_nick},
 						{ok_nick, #cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch}}
 			end
 	end.
@@ -192,15 +192,15 @@ do_msg_send(State, Ref, ChatName, Message) ->
     % {{dummy_target, dummy_response}, State}.
 	%3.6.1.2
 	%look up the PID of the chatroom its connected to 
-	ChatroomPID= maps:get(ChatName, State#cl_st.con_ch),
+	ChatroomPID = maps:get(ChatName, State#cl_st.con_ch),
 	%3.6.1.3 sending client will then send message to the chatroomn
 	ChatroomPID!{self(), Ref, message, Message},
 	receive
 		{ _, Ref, ack_msg} ->
 			% message recieved as per 3.6.1.4
 			% then send to gui
-			io:fwrite("~s",State#cl_st.gui),
-			whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, {msg_sent, State#cl_st.nick}},
+			%%io:fwrite("~s",State#cl_st.gui),
+			%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, {msg_sent, State#cl_st.nick}},
 			{ack_msg, State}
 	end.
  	
