@@ -80,7 +80,7 @@ loop(State, Request, Ref) ->
 
 	%% GUI requests the nickname of client
 	whoami ->
-	    {{dummy_target, dummy_response}, State};
+	    {Nickname, State#cl_st.nick};
 
 	%% GUI requests to update nickname to Nick
 	{nick, Nick} ->
