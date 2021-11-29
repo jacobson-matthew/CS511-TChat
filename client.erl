@@ -177,7 +177,7 @@ do_new_nick(State, Ref, NewNick) ->
 				{_ , Ref, err_nick_used} -> 
 						%% 3.5.4 take message and pass back to the gui from the server 
 						%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_nick_used},
-						{err_nick_used, #cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch}};
+						{err_nick_used, #cl_st {gui = State#cl_st.gui, nick = State#cl_st.nick , con_ch = State#cl_st.con_ch}};
 				{_ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 
 						% update nick locally 
@@ -201,7 +201,7 @@ do_msg_send(State, Ref, ChatName, Message) ->
 			% then send to gui
 			%%io:fwrite("~s",State#cl_st.gui),
 			%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, {msg_sent, State#cl_st.nick}},
-			{ack_msg, State}
+			{{msg_sent, State#cl_st.nick}, State}
 	end.
  	
 %% executes new incoming message protocol from client perspective
@@ -219,7 +219,7 @@ do_quit(State, Ref) ->
 	receive
 		{ _, Ref, ack_quit} ->
 			%3.7.5 client must send quit to GUI
-			whereis(list_to_atom(State#cl_st.gui))!{self(), Ref, ack_quit}
+			{ack_quit, State}
 	end,
 	% 3.7.6 the client muyst cleanly exit 
 	exit("Goodbye...").
