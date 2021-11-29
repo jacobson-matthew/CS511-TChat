@@ -168,7 +168,7 @@ do_new_nick(State, Ref, NewNick) ->
 		true ->
 			%if it is the same client sends message to gui  3.5.2 
 			%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_same},
-			{err, State};
+			{err_same, State};
 		false ->
 			% if not the same send nickname to server to update
 			%3.5.3
