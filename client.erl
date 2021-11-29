@@ -116,7 +116,7 @@ do_join(State, Ref, ChatName) ->
 	% 3.2.2
 	case lists:member(ChatName, Chatrooms) of
 		true ->
-				whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err},
+				%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err},
 				{err, State};
 		false ->  
 				% send "ask to join" message to the server @ ServerPID
@@ -130,8 +130,8 @@ do_join(State, Ref, ChatName) ->
 						% update connected chatrooms
 						%send{result,self(), Ref, History} SEND IT ALL TO GUI TO WRITE TO THE SCREEN
 						%3.2.9
-						whereis(list_to_atom(State#cl_st.gui))!{result,self(), Ref, History},
-						{History, #cl_st{con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)}}
+						%%whereis(list_to_atom(State#cl_st.gui))!{result,self(), Ref, History},
+						{History, #cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:put(ChatName, ChatPID, State#cl_st.con_ch)}}
 				end
 	end.
 
@@ -150,12 +150,12 @@ do_leave(State, Ref, ChatName) ->
 					%3.3.8 client removes the chatroom from list of chatrooms
 					UpState = #cl_st{gui = State#cl_st.gui, nick = State#cl_st.nick, con_ch = maps:remove(ChatName, State#cl_st.con_ch)},
 					%3.3.9 client sends message back to the GUI
-					whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, ok},
-					{ack_leave, UpState}
+					%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, ok},
+					{ok, UpState}
 			end;
 		false->
 			%%if not throw the error to the GUI ----- 3.3.2
-			State#cl_st.gui!{result, self(), Ref, err},
+			%%State#cl_st.gui!{result, self(), Ref, err},
 			{err, State}
 		end. 
 
@@ -167,7 +167,7 @@ do_new_nick(State, Ref, NewNick) ->
 	case (CurrentNick == NewNick) of
 		true ->
 			%if it is the same client sends message to gui  3.5.2 
-			whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_same},
+			%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_same},
 			{err, State};
 		false ->
 			% if not the same send nickname to server to update
@@ -176,7 +176,7 @@ do_new_nick(State, Ref, NewNick) ->
 			receive
 				{_ , Ref, err_nick_used} -> 
 						%% 3.5.4 take message and pass back to the gui from the server 
-						whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_nick_used},
+						%%whereis(list_to_atom(State#cl_st.gui))!{result, self(), Ref, err_nick_used},
 						{err_nick_used, #cl_st {gui = State#cl_st.gui, nick = NewNick, con_ch = State#cl_st.con_ch}};
 				{_ , Ref, ok_nick} -> 
 						%3.5.8 client sends back to gui 

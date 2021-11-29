@@ -70,7 +70,7 @@ do_propegate_message(State, Ref, ClientPID, Message) ->
 	AllinRoom = maps:keys(State#chat_st.registrations),
 	Receivers = lists:delete(ClientPID, AllinRoom),
 	% for each recivers send message to all but the sender 3.6.2.1
-	lists:foreach(fun(DestinationClient) -> DestinationClient!{request, self(), Ref, {incoming_msg, SenderName, State#chat_st.name, Message}}end, Receivers),
+	lists:foreach(fun(DestinationClient) -> DestinationClient!{request, self(), Ref, {incoming_msg, SenderName, State#chat_st.name, Message}} end, Receivers),
 	% append current message to history 3.6.2.2
 	#chat_st {name = State#chat_st.name, registrations = State#chat_st.registrations, history = lists:append(State#chat_st.history, [{SenderName, Message}])}.
 
