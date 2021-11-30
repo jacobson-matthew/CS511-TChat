@@ -222,7 +222,7 @@ do_quit(State, Ref) ->
 			{ack_quit, State}
 	end,
 	% 3.7.6 the client must cleanly exit
-	io:format('~p~n', [State]]),
+	io:format('~p~n', [State]),
 	exit("Goodbye...").
 
 			
