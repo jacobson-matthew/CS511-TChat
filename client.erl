@@ -13,6 +13,9 @@
 -spec do_new_nick(_State, _Ref, _NewNick) -> _.
 -spec do_new_incoming_msg(_State, _Ref, _SenderNick, _ChatName, _Message) -> _.
 
+%% Jared Follet and Matthew Jacobson "I pledge my honor that I have abided by the stevens honor system"
+
+
 %% Receive messages from GUI and handle them accordingly
 %% All handling can be done in loop(...)
 main(InitialState) ->

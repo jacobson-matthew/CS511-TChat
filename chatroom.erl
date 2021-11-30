@@ -11,6 +11,8 @@
 -spec do_update_nick(_State, _ClientPID, _NewNick) -> _NewState.
 -spec do_propegate_message(_State, _Ref, _ClientPID, _Message) -> _NewState.
 
+%% Jared Follet and Matthew Jacobson "I pledge my honor that I have abided by the stevens honor system"
+
 start_chatroom(ChatName) ->
     loop(#chat_st{name = ChatName,
 		  registrations = maps:new(), history = []}),

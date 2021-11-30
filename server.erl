@@ -11,6 +11,9 @@
 -spec do_new_nick(_State, _Ref, _ClientPID, _NewNick) -> _.
 -spec do_client_quit(_State, _Ref, _ClientPID) -> _NewState.
 
+
+%% Jared Follet and Matthew Jacobson "I pledge my honor that I have abided by the stevens honor system"
+
 start_server() ->
     catch(unregister(server)),
     register(server, self()),
