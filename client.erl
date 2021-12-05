@@ -222,7 +222,9 @@ do_quit(State, Ref) ->
 	receive
 		{ _, Ref, ack_quit} ->
 			%3.7.5 client must send quit to GUI
-			{ack_quit, State}
+			%%{ack_quit, State}
+			whereis(list_to_atom(State#cl_st.gui))!{self(), Ref, ack_quit},
+			{shutdown, State}
 	end,
 	% 3.7.6 the client must cleanly exit
 	io:format('~p~n', [State]),
